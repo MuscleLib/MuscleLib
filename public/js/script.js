@@ -49,7 +49,7 @@ const storedLanguage =
   typeof localStorage !== "undefined"
     ? localStorage.getItem("musclelib-language")
     : null;
-let currentLanguage = storedLanguage || "pt";
+let currentLanguage = ["pt", "en", "es"].includes(storedLanguage) ? storedLanguage : "pt";
 const activeFilters = {
   primaryMuscles: "",
   secondaryMuscles: "",
@@ -264,7 +264,7 @@ function formatOptionLabel(value) {
 
 function normalizeLocalizedValue(value, language = currentLanguage) {
   if (value && typeof value === "object" && !Array.isArray(value)) {
-    return value[language] || value.en || value.pt || "";
+    return value[language] || value.en || value.pt || value.es || "";
   }
 
   return value;
