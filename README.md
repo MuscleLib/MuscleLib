@@ -11,6 +11,7 @@ Este projeto visa auxiliar iniciantes em musculação a descobrir novos exercíc
 - **Modo Claro/Escuro**: O usuário pode alternar entre temas claro e escuro.
 - **Escolha de Tema Personalizado**: Opções de temas coloridos para personalizar a aparência do site.
 - **Responsividade**: O layout é adaptável para diferentes tamanhos de tela, proporcionando uma boa experiência em dispositivos móveis e desktop.
+- **Idiomas**: Interface e conteúdo dos exercícios disponíveis em português, inglês e espanhol.
 
 ## Tecnologias Usadas
 
