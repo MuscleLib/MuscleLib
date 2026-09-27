@@ -126,6 +126,38 @@ const uiText = {
     showInstructions: "Show instructions",
     searchOptions: "Search options...",
   },
+  es: {
+    controlsKicker: "Biblioteca",
+    controlsTitle: "Ejercicios",
+    languageLabel: "Idioma",
+    muscleLabel: "Músculo",
+    secondaryMuscleLabel: "Músculo secundario",
+    difficultyLabel: "Dificultad",
+    equipmentLabel: "Equipamiento",
+    categoryLabel: "Categoría",
+    forceLabel: "Fuerza",
+    allMuscles: "Todos los músculos",
+    allSecondaryMuscles: "Todos los secundarios",
+    allDifficulties: "Todas las dificultades",
+    allEquipment: "Todo el equipamiento",
+    allCategories: "Todas las categorías",
+    allForces: "Todas las fuerzas",
+    filterToggle: "Filtros",
+    clearFilters: "Limpiar filtros",
+    loadingMore: "Cargando más ejercicios...",
+    loadingOptions: "Cargando filtros...",
+    noResults: "No se encontraron ejercicios con estos filtros.",
+    activeFilters: "Filtros activos",
+    level: "Nivel",
+    category: "Categoría",
+    force: "Fuerza",
+    equipment: "Equipamiento",
+    primaryMuscles: "Músculo principal",
+    secondaryMuscles: "Músculos secundarios",
+    none: "Ninguno",
+    showInstructions: "Mostrar instrucciones",
+    searchOptions: "Buscar opciones...",
+  },
 };
 
 const revealObserver = new IntersectionObserver((entries) => {
@@ -201,7 +233,8 @@ function updateFilterStatus() {
 }
 
 function translateStaticUi() {
-  document.documentElement.lang = currentLanguage === "pt" ? "pt-br" : "en";
+  document.documentElement.lang =
+    currentLanguage === "pt" ? "pt-br" : currentLanguage;
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
     element.textContent = getText(key);
