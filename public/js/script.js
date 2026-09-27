@@ -63,6 +63,7 @@ const filterFields = Object.keys(activeFilters);
 
 const uiText = {
   pt: {
+    pageTitle: "Biblioteca de Exercícios",
     controlsKicker: "Biblioteca",
     controlsTitle: "Exercicios",
     languageLabel: "Idioma",
@@ -95,6 +96,7 @@ const uiText = {
     searchOptions: "Buscar opcoes...",
   },
   en: {
+    pageTitle: "Exercise Library",
     controlsKicker: "Library",
     controlsTitle: "Exercises",
     languageLabel: "Language",
@@ -127,6 +129,7 @@ const uiText = {
     searchOptions: "Search options...",
   },
   es: {
+    pageTitle: "Biblioteca de Ejercicios",
     controlsKicker: "Biblioteca",
     controlsTitle: "Ejercicios",
     languageLabel: "Idioma",
