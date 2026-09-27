@@ -33,7 +33,7 @@ function createNavbar() {
 
     const languageControl = document.createElement('label');
     languageControl.className = 'language-control nav-language';
-    languageControl.setAttribute('aria-label', 'Selecionar idioma');
+    languageControl.setAttribute('aria-label', 'Select language');
 
     const languageIcon = document.createElement('i');
     languageIcon.className = 'fas fa-globe';
@@ -42,7 +42,7 @@ function createNavbar() {
     const languageSelect = document.createElement('select');
     languageSelect.id = 'language-select';
     languageSelect.className = 'filter-select form-select';
-    languageSelect.setAttribute('aria-label', 'Selecionar idioma');
+    languageSelect.setAttribute('aria-label', 'Select language');
 
     const portugueseOption = document.createElement('option');
     portugueseOption.value = 'pt';
@@ -52,8 +52,13 @@ function createNavbar() {
     englishOption.value = 'en';
     englishOption.textContent = 'EN';
 
+    const spanishOption = document.createElement('option');
+    spanishOption.value = 'es';
+    spanishOption.textContent = 'ES';
+
     languageSelect.appendChild(portugueseOption);
     languageSelect.appendChild(englishOption);
+    languageSelect.appendChild(spanishOption);
     languageControl.appendChild(languageIcon);
     languageControl.appendChild(languageSelect);
 

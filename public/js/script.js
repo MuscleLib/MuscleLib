@@ -49,7 +49,7 @@ const storedLanguage =
   typeof localStorage !== "undefined"
     ? localStorage.getItem("musclelib-language")
     : null;
-let currentLanguage = storedLanguage || "pt";
+let currentLanguage = ["pt", "en", "es"].includes(storedLanguage) ? storedLanguage : "pt";
 const activeFilters = {
   primaryMuscles: "",
   secondaryMuscles: "",
@@ -63,6 +63,7 @@ const filterFields = Object.keys(activeFilters);
 
 const uiText = {
   pt: {
+    pageTitle: "Biblioteca de Exercícios",
     controlsKicker: "Biblioteca",
     controlsTitle: "Exercicios",
     languageLabel: "Idioma",
@@ -95,6 +96,7 @@ const uiText = {
     searchOptions: "Buscar opcoes...",
   },
   en: {
+    pageTitle: "Exercise Library",
     controlsKicker: "Library",
     controlsTitle: "Exercises",
     languageLabel: "Language",
@@ -125,6 +127,39 @@ const uiText = {
     none: "None",
     showInstructions: "Show instructions",
     searchOptions: "Search options...",
+  },
+  es: {
+    pageTitle: "Biblioteca de Ejercicios",
+    controlsKicker: "Biblioteca",
+    controlsTitle: "Ejercicios",
+    languageLabel: "Idioma",
+    muscleLabel: "Músculo",
+    secondaryMuscleLabel: "Músculo secundario",
+    difficultyLabel: "Dificultad",
+    equipmentLabel: "Equipamiento",
+    categoryLabel: "Categoría",
+    forceLabel: "Fuerza",
+    allMuscles: "Todos los músculos",
+    allSecondaryMuscles: "Todos los secundarios",
+    allDifficulties: "Todas las dificultades",
+    allEquipment: "Todo el equipamiento",
+    allCategories: "Todas las categorías",
+    allForces: "Todas las fuerzas",
+    filterToggle: "Filtros",
+    clearFilters: "Limpiar filtros",
+    loadingMore: "Cargando más ejercicios...",
+    loadingOptions: "Cargando filtros...",
+    noResults: "No se encontraron ejercicios con estos filtros.",
+    activeFilters: "Filtros activos",
+    level: "Nivel",
+    category: "Categoría",
+    force: "Fuerza",
+    equipment: "Equipamiento",
+    primaryMuscles: "Músculo principal",
+    secondaryMuscles: "Músculos secundarios",
+    none: "Ninguno",
+    showInstructions: "Mostrar instrucciones",
+    searchOptions: "Buscar opciones...",
   },
 };
 
@@ -201,7 +236,8 @@ function updateFilterStatus() {
 }
 
 function translateStaticUi() {
-  document.documentElement.lang = currentLanguage === "pt" ? "pt-br" : "en";
+  document.documentElement.lang =
+    currentLanguage === "pt" ? "pt-br" : currentLanguage;
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
     element.textContent = getText(key);
@@ -228,7 +264,7 @@ function formatOptionLabel(value) {
 
 function normalizeLocalizedValue(value, language = currentLanguage) {
   if (value && typeof value === "object" && !Array.isArray(value)) {
-    return value[language] || value.en || value.pt || "";
+    return value[language] || value.en || value.pt || value.es || "";
   }
 
   return value;

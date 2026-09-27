@@ -54,7 +54,16 @@ function createSearchBar() {
 
     const searchInput = document.createElement('input');
     searchInput.type = 'text';
-    searchInput.placeholder = 'Pesquisar exercicios...';
+    const getSearchPlaceholder = () => {
+        const language = typeof getCurrentLanguage === 'function' ? getCurrentLanguage() : 'pt';
+        return {
+            pt: 'Pesquisar exercícios...',
+            en: 'Search exercises...',
+            es: 'Buscar ejercicios...',
+        }[language] || 'Search exercises...';
+    };
+
+    searchInput.placeholder = getSearchPlaceholder();
     searchInput.className = 'search-input';
 
     const searchButton = document.createElement('button');
@@ -105,6 +114,7 @@ function createSearchBar() {
 
     document.addEventListener('languageChanged', () => {
         searchInput.value = '';
+        searchInput.placeholder = getSearchPlaceholder();
         collapseSearch();
     });
 }
