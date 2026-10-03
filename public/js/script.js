@@ -3,6 +3,7 @@ const exercisesPerPage = 50;
 let loading = false;
 let hasMoreExercises = true;
 let isShowingSearchResults = false;
+let searchResults = [];
 const currentHostname =
   typeof window !== "undefined" && window.location
     ? window.location.hostname
@@ -587,6 +588,10 @@ function displayExercises(exercises) {
 }
 
 function reloadExercises() {
+  if (isShowingSearchResults) {
+    renderSearchResults();
+    return;
+  }
   isShowingSearchResults = false;
   hasMoreExercises = true;
   resetExercisesContainer();
@@ -622,6 +627,8 @@ function initFilterControls() {
   }
 
   languageSelect.addEventListener("change", () => {
+    isShowingSearchResults = false;
+    searchResults = [];
     currentLanguage = languageSelect.value;
     if (typeof localStorage !== "undefined") {
       localStorage.setItem("musclelib-language", currentLanguage);
@@ -670,20 +677,27 @@ window.addEventListener('scroll', () => {
     }
 });
 
-document.addEventListener('searchResults', (e) => {
-    isShowingSearchResults = true;
+function renderSearchResults() {
     resetExercisesContainer();
 
-    const filteredResults = e.detail.filter(matchesActiveFilters);
+    const filteredResults = searchResults.filter(matchesActiveFilters);
 
     if (filteredResults.length > 0) {
       displayExercises(filteredResults);
     } else {
       showEmptyState();
     }
+}
+
+document.addEventListener('searchResults', (e) => {
+    isShowingSearchResults = true;
+    searchResults = e.detail;
+    renderSearchResults();
 });
 
 document.addEventListener('clearSearchResults', () => {
+    isShowingSearchResults = false;
+    searchResults = [];
     reloadExercises();
 });
 
