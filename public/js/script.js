@@ -681,7 +681,6 @@ function initFilterControls() {
   }
 
   languageSelect.addEventListener("change", () => {
-    for (const scope of requestErrors.keys()) clearRequestError(scope);
     currentLanguage = languageSelect.value;
     if (typeof localStorage !== "undefined") {
       localStorage.setItem("musclelib-language", currentLanguage);
@@ -731,10 +730,6 @@ window.addEventListener('scroll', () => {
 });
 
 document.addEventListener('searchResults', (e) => {
-    exerciseRequestId++;
-    setExercisesLoading(false);
-    clearRequestError("search");
-    clearRequestError("exercises");
     isShowingSearchResults = true;
     resetExercisesContainer();
 
@@ -747,11 +742,18 @@ document.addEventListener('searchResults', (e) => {
     }
 });
 
-document.addEventListener('searchStarted', () => {
+function stopCatalogueRequest() {
     exerciseRequestId++;
     setExercisesLoading(false);
     clearRequestError("search");
     clearRequestError("exercises");
+}
+
+document.addEventListener('searchStarted', stopCatalogueRequest);
+document.addEventListener('searchResults', stopCatalogueRequest);
+
+document.addEventListener('languageChanged', () => {
+    for (const scope of requestErrors.keys()) clearRequestError(scope);
 });
 
 document.addEventListener('searchError', (e) => {
