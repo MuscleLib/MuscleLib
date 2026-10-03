@@ -22,8 +22,7 @@ async function searchExercises(query) {
         if (data.exercises && data.exercises.length > 0) {
             document.dispatchEvent(new CustomEvent('searchResults', { detail: data.exercises }));
         } else {
-            console.warn('Nenhum exercicio encontrado para a pesquisa:', query);
-            clearSearchResults();
+            document.dispatchEvent(new CustomEvent('searchResults', { detail: [] }));
         }
     } catch (error) {
         if (error.name === 'AbortError') {
