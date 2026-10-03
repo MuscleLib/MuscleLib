@@ -2,22 +2,26 @@ let searchTimeoutId;
 let searchController;
 
 async function searchExercises(query) {
+    const controller = new AbortController();
     try {
         if (searchController) {
             searchController.abort();
         }
 
-        searchController = new AbortController();
+        searchController = controller;
+        document.dispatchEvent(new CustomEvent('searchStarted'));
         const language = typeof getCurrentLanguage === 'function' ? getCurrentLanguage() : 'pt';
         const response = await fetch(`${apiBaseUrl}/api/exercises/search?lang=${language}&query=${encodeURIComponent(query)}`, {
-            signal: searchController.signal,
+            signal: controller.signal,
         });
+        if (controller.signal.aborted) return;
 
         if (!response.ok) {
             throw new Error(`Erro na API: ${response.statusText}`);
         }
 
         const data = await response.json();
+        if (controller.signal.aborted) return;
 
         if (data.exercises && data.exercises.length > 0) {
             document.dispatchEvent(new CustomEvent('searchResults', { detail: data.exercises }));
@@ -25,14 +29,14 @@ async function searchExercises(query) {
             document.dispatchEvent(new CustomEvent('searchResults', { detail: [] }));
         }
     } catch (error) {
-        if (error.name === 'AbortError') {
+        if (error.name === 'AbortError' || controller.signal.aborted) {
             return;
         }
 
         console.error('Erro ao buscar exercicios:', error);
-        clearSearchResults();
+        document.dispatchEvent(new CustomEvent('searchError', { detail: { retry: () => searchExercises(query) } }));
     } finally {
-        searchController = null;
+        if (searchController === controller) searchController = null;
     }
 }
 
@@ -96,6 +100,8 @@ function createSearchBar() {
         const query = e.target.value.trim().toLowerCase();
 
         clearTimeout(searchTimeoutId);
+        if (searchController) searchController.abort();
+        document.dispatchEvent(new CustomEvent('searchStarted'));
 
         if (!query) {
             if (searchController) {
@@ -112,6 +118,8 @@ function createSearchBar() {
     });
 
     document.addEventListener('languageChanged', () => {
+        clearTimeout(searchTimeoutId);
+        if (searchController) searchController.abort();
         searchInput.value = '';
         searchInput.placeholder = getSearchPlaceholder();
         collapseSearch();

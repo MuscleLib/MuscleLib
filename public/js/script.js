@@ -16,6 +16,8 @@ const apiBaseUrl =
     : "https://libapi.vercel.app";
 let renderedCardCount = 0;
 let filterOptionsRequestId = 0;
+let exerciseRequestId = 0;
+const requestErrors = new Map();
 
 const responseCache = new Map();
 const CACHE_TTL = 10 * 60 * 1000;
@@ -95,6 +97,10 @@ const uiText = {
     none: "Nenhum",
     showInstructions: "Mostrar instrucoes",
     searchOptions: "Buscar opcoes...",
+    filterError: "Não foi possível carregar os filtros.",
+    exerciseError: "Não foi possível carregar os exercícios. Os resultados anteriores foram mantidos.",
+    searchError: "Não foi possível concluir a pesquisa. Tente novamente.",
+    retry: "Tentar novamente",
   },
   en: {
     pageTitle: "Exercise Library",
@@ -128,6 +134,10 @@ const uiText = {
     none: "None",
     showInstructions: "Show instructions",
     searchOptions: "Search options...",
+    filterError: "Unable to load filters.",
+    exerciseError: "Unable to load exercises. Previous results have been kept.",
+    searchError: "Unable to complete the search. Please try again.",
+    retry: "Try again",
   },
   es: {
     pageTitle: "Biblioteca de Ejercicios",
@@ -161,6 +171,10 @@ const uiText = {
     none: "Ninguno",
     showInstructions: "Mostrar instrucciones",
     searchOptions: "Buscar opciones...",
+    filterError: "No se pudieron cargar los filtros.",
+    exerciseError: "No se pudieron cargar los ejercicios. Se conservaron los resultados anteriores.",
+    searchError: "No se pudo completar la búsqueda. Inténtalo de nuevo.",
+    retry: "Reintentar",
   },
 };
 
@@ -187,6 +201,38 @@ function getActiveFilters() {
 
 function getText(key, language = currentLanguage) {
   return uiText[language][key] || uiText.en[key] || key;
+}
+
+function clearRequestError(scope) {
+  requestErrors.get(scope)?.remove();
+  requestErrors.delete(scope);
+}
+
+function showRequestError(scope, key, retry) {
+  clearRequestError(scope);
+  const container = document.getElementById("request-errors");
+  if (!container) return;
+  const alert = document.createElement("div");
+  alert.className = "alert alert-warning d-flex align-items-center gap-3";
+  alert.setAttribute("role", "alert");
+  const message = document.createElement("p");
+  message.className = "mb-0";
+  message.textContent = getText(key);
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "btn btn-outline-secondary";
+  button.textContent = getText("retry");
+  button.addEventListener("click", retry);
+  alert.appendChild(message);
+  alert.appendChild(button);
+  container.appendChild(alert);
+  requestErrors.set(scope, alert);
+}
+
+function setExercisesLoading(value) {
+  loading = value;
+  const indicator = document.getElementById("loading-indicator");
+  if (indicator) indicator.style.display = value ? "block" : "none";
 }
 
 function buildQueryString(params) {
@@ -350,8 +396,12 @@ async function loadFilterOptions() {
     filterFields.forEach((field) =>
       populateFilterSelect(field, filterOptions[field] || []),
     );
+    clearRequestError("filters");
   } catch (err) {
     console.error("Erro ao carregar filtros:", err);
+    if (requestId === filterOptionsRequestId && language === currentLanguage) {
+      showRequestError("filters", "filterError", loadFilterOptions);
+    }
   } finally {
     if (requestId === filterOptionsRequestId && language === currentLanguage) {
       updateFilterStatus();
@@ -359,14 +409,16 @@ async function loadFilterOptions() {
   }
 }
 
-async function fetchExercises(page = 0, limit = exercisesPerPage) {
-    if (loading || !hasMoreExercises) {
+async function fetchExercises(page = 0, limit = exercisesPerPage, replace = false) {
+    if (!replace && (loading || !hasMoreExercises)) {
         return;
     }
-
+    const requestId = ++exerciseRequestId;
+    const url = buildExerciseUrl(page, limit);
     try {
-        loading = true;
-        const response = await cachedFetch(buildExerciseUrl(page, limit));
+        setExercisesLoading(true);
+        const response = await cachedFetch(url);
+        if (requestId !== exerciseRequestId) return;
 
         if (response.status === 404) {
           if (page === 0) {
@@ -374,7 +426,7 @@ async function fetchExercises(page = 0, limit = exercisesPerPage) {
           }
 
           hasMoreExercises = false;
-          loading = false;
+          clearRequestError("exercises");
           return;
         }
 
@@ -383,10 +435,13 @@ async function fetchExercises(page = 0, limit = exercisesPerPage) {
         }
 
         const exercises = await response.json();
+        if (requestId !== exerciseRequestId) return;
+        if (replace) resetExercisesContainer();
+        clearRequestError("exercises");
 
         if (exercises.length > 0) {
           displayExercises(exercises);
-          currentPage++;
+          currentPage = page + 1;
           hasMoreExercises = exercises.length === limit;
         } else if (page === 0) {
           showEmptyState();
@@ -395,10 +450,13 @@ async function fetchExercises(page = 0, limit = exercisesPerPage) {
           hasMoreExercises = false;
         }
 
-        loading = false;
     } catch (err) {
         console.error("Erro ao buscar exercicios:", err);
-        loading = false;
+        if (requestId === exerciseRequestId) {
+          showRequestError("exercises", "exerciseError", () => fetchExercises(page, limit, replace));
+        }
+    } finally {
+        if (requestId === exerciseRequestId) setExercisesLoading(false);
     }
 }
 
@@ -594,9 +652,10 @@ function reloadExercises() {
   }
   isShowingSearchResults = false;
   hasMoreExercises = true;
-  resetExercisesContainer();
   currentPage = 0;
-  fetchExercises(0);
+  clearRequestError("search");
+  clearRequestError("exercises");
+  fetchExercises(0, exercisesPerPage, true);
 }
 
 function initFilterControls() {
@@ -693,6 +752,24 @@ document.addEventListener('searchResults', (e) => {
     isShowingSearchResults = true;
     searchResults = e.detail;
     renderSearchResults();
+});
+
+function stopCatalogueRequest() {
+    exerciseRequestId++;
+    setExercisesLoading(false);
+    clearRequestError("search");
+    clearRequestError("exercises");
+}
+
+document.addEventListener('searchStarted', stopCatalogueRequest);
+document.addEventListener('searchResults', stopCatalogueRequest);
+
+document.addEventListener('languageChanged', () => {
+    for (const scope of requestErrors.keys()) clearRequestError(scope);
+});
+
+document.addEventListener('searchError', (e) => {
+    showRequestError("search", "searchError", e.detail.retry);
 });
 
 document.addEventListener('clearSearchResults', () => {
