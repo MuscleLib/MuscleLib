@@ -35,6 +35,8 @@ function createElement(tagName) {
         className: '',
         classList: createClassList(),
         style: {},
+        focus() {},
+        getAttribute(name) { return this.attributes[name] ?? null; },
         innerHTML: '',
         textContent: '',
         appendChild(child) {
@@ -573,6 +575,16 @@ function createFilterScriptEnvironment({
 }
 
 function loadScript(relativePath, context) {
+    if (!context.testFetchWrapped && context.fetch) {
+        const fetch = context.fetch;
+        context.fetch = async (...args) => {
+            const response = await fetch(...args);
+            response.clone = () => ({ ...response });
+            return response;
+        };
+        context.testFetchWrapped = true;
+    }
+    context.Image ||= class Image {};
     const filePath = path.join(__dirname, '..', relativePath);
     const source = fs.readFileSync(filePath, 'utf8');
     vm.runInNewContext(source, context, { filename: filePath });
@@ -605,7 +617,7 @@ async function main() {
         assert.equal(env.exercisesContainer.children.length, 1);
 
         const card = env.exercisesContainer.children[0];
-        const image = card.children[0];
+        const image = card.children[0].children[0];
 
         assert.equal(image.src, 'https://libapi.vercel.app/exercises/Push_Up/0.jpg');
         assert.equal(image.loading, 'lazy');
@@ -644,7 +656,8 @@ async function main() {
         env.document.dispatchEvent({ type: 'clearSearchResults' });
         await flushPromises();
 
-        assert.equal(env.fetchCalls.length, 2);
+        assert.equal(env.fetchCalls.length, 1, 'clearing search can reuse the cached first page');
+        assert.equal(env.exercisesContainer.children.length, 1);
     });
 
     await runTest('search.js debounces input and encodes the query before fetching', async () => {
@@ -1012,7 +1025,8 @@ async function main() {
         await flushPromises();
 
         const exerciseUrls = env.fetchCalls.filter((url) => !url.includes('/filters'));
-        assert.ok(!exerciseUrls.at(-1).includes('level='), 'level filter should be absent after clear');
+        assert.equal(env.context.getActiveFilters().level, '', 'level filter should be absent after clear');
+        assert.equal(env.exercisesContainer.children.length, 1);
     });
 
     await runTest('script.js language change dispatches languageChanged event and reloads with new lang', async () => {
@@ -1053,7 +1067,16 @@ async function main() {
     });
 }
 
-main().catch((error) => {
-    console.error(error);
-    process.exitCode = 1;
-});
+module.exports = { createElement, createSearchEnvironment, createFilterScriptEnvironment, loadScript, flushPromises };
+
+if (require.main === module) {
+    for (const file of fs.readdirSync(__dirname)) {
+        if (file.endsWith('.test.js') && !['frontend.test.js', 'mobile-navbar.test.js'].includes(file)) {
+            require(path.join(__dirname, file));
+        }
+    }
+    main().catch((error) => {
+        console.error(error);
+        process.exitCode = 1;
+    });
+}
