@@ -72,7 +72,8 @@ function createSearchBar() {
     const searchButton = document.createElement('button');
     searchButton.type = 'button';
     searchButton.className = 'search-icon';
-    searchButton.setAttribute('aria-label', 'Pesquisar');
+    searchButton.setAttribute('aria-label', typeof getText === 'function' ? getText('searchAction') : 'Pesquisar');
+    searchButton.setAttribute('data-i18n-aria-label', 'searchAction');
     searchButton.innerHTML = '<i class="fas fa-search" aria-hidden="true"></i>';
 
     searchContainer.appendChild(searchInput);
