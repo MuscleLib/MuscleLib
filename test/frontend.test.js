@@ -1070,6 +1070,11 @@ async function main() {
 module.exports = { createElement, createSearchEnvironment, createFilterScriptEnvironment, loadScript, flushPromises };
 
 if (require.main === module) {
+    for (const file of fs.readdirSync(__dirname)) {
+        if (file.endsWith('.test.js') && !['frontend.test.js', 'mobile-navbar.test.js'].includes(file)) {
+            require(path.join(__dirname, file));
+        }
+    }
     main().catch((error) => {
         console.error(error);
         process.exitCode = 1;
