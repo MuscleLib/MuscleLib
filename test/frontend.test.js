@@ -706,7 +706,7 @@ async function main() {
         await flushPromises();
     });
 
-    await runTest('search.js dispatches clearSearchResults when API returns empty exercises', async () => {
+    await runTest('search.js dispatches empty searchResults when API returns empty exercises', async () => {
         const env = createSearchEnvironment({ emptyResults: true });
 
         loadScript(path.join('public', 'js', 'components', 'search.js'), env.context);
@@ -719,8 +719,8 @@ async function main() {
         await flushPromises();
 
         assert.equal(env.fetchCalls.length, 1);
-        assert.equal(env.dispatchedEvents.at(-1).type, 'clearSearchResults');
-        assert.ok(!env.dispatchedEvents.some((e) => e.type === 'searchResults'));
+        assert.equal(env.dispatchedEvents.at(-1).type, 'searchResults');
+        assert.equal(env.dispatchedEvents.at(-1).detail.length, 0);
     });
 
     await runTest('search.js dispatches clearSearchResults when API response is not ok', async () => {
