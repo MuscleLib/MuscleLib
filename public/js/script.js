@@ -67,6 +67,8 @@ const uiText = {
     controlsKicker: "Biblioteca",
     controlsTitle: "Exercicios",
     languageLabel: "Idioma",
+    searchAction: "Pesquisar",
+    themeLabel: "Alternar tema",
     muscleLabel: "Musculo",
     secondaryMuscleLabel: "Musculo secundario",
     difficultyLabel: "Dificuldade",
@@ -100,6 +102,8 @@ const uiText = {
     controlsKicker: "Library",
     controlsTitle: "Exercises",
     languageLabel: "Language",
+    searchAction: "Search",
+    themeLabel: "Toggle theme",
     muscleLabel: "Muscle",
     secondaryMuscleLabel: "Secondary muscle",
     difficultyLabel: "Difficulty",
@@ -133,6 +137,8 @@ const uiText = {
     controlsKicker: "Biblioteca",
     controlsTitle: "Ejercicios",
     languageLabel: "Idioma",
+    searchAction: "Buscar",
+    themeLabel: "Cambiar tema",
     muscleLabel: "Músculo",
     secondaryMuscleLabel: "Músculo secundario",
     difficultyLabel: "Dificultad",
@@ -245,6 +251,9 @@ function translateStaticUi() {
   document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
     const key = element.getAttribute("data-i18n-placeholder");
     element.placeholder = getText(key);
+  });
+  document.querySelectorAll("[data-i18n-aria-label]").forEach((element) => {
+    element.setAttribute("aria-label", getText(element.getAttribute("data-i18n-aria-label")));
   });
   updateLoadingText();
   updateFilterStatus();

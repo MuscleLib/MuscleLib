@@ -13,7 +13,8 @@
     "express": "^4.21.2"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22"
+    "nodemon": "^2.0.22",
+    "playwright": "^1.62.1"
   },
   "author": "Daniel Melo",
   "license": "ISC"

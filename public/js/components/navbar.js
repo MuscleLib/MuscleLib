@@ -29,11 +29,14 @@ function createNavbar() {
     filterToggle.type = 'button';
     filterToggle.setAttribute('aria-expanded', 'false');
     filterToggle.setAttribute('aria-controls', 'filter-options');
+    filterToggle.setAttribute('aria-label', 'Filtros');
+    filterToggle.setAttribute('data-i18n-aria-label', 'filterToggle');
     filterToggle.innerHTML = '<i class="fas fa-sliders" aria-hidden="true"></i><span data-i18n="filterToggle">Filtros</span><i class="filter-toggle-icon fas fa-chevron-down" aria-hidden="true"></i>';
 
     const languageControl = document.createElement('label');
     languageControl.className = 'language-control nav-language';
     languageControl.setAttribute('aria-label', 'Select language');
+    languageControl.setAttribute('data-i18n-aria-label', 'languageLabel');
 
     const languageIcon = document.createElement('i');
     languageIcon.className = 'fas fa-globe';
@@ -43,6 +46,7 @@ function createNavbar() {
     languageSelect.id = 'language-select';
     languageSelect.className = 'filter-select form-select';
     languageSelect.setAttribute('aria-label', 'Select language');
+    languageSelect.setAttribute('data-i18n-aria-label', 'languageLabel');
 
     const portugueseOption = document.createElement('option');
     portugueseOption.value = 'pt';
@@ -67,6 +71,7 @@ function createNavbar() {
     themeToggle.className = 'nav-icon-btn';
     themeToggle.type = 'button';
     themeToggle.setAttribute('aria-label', 'Alternar tema');
+    themeToggle.setAttribute('data-i18n-aria-label', 'themeLabel');
 
     const themeIcon = document.createElement('i');
     themeIcon.id = 'theme-icon';
