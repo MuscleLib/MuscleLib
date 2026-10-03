@@ -723,7 +723,7 @@ async function main() {
         assert.ok(!env.dispatchedEvents.some((e) => e.type === 'searchResults'));
     });
 
-    await runTest('search.js dispatches clearSearchResults when API response is not ok', async () => {
+    await runTest('search.js reports a search error when API response is not ok', async () => {
         const env = createSearchEnvironment({ errorResponse: true });
 
         loadScript(path.join('public', 'js', 'components', 'search.js'), env.context);
@@ -736,7 +736,7 @@ async function main() {
         await flushPromises();
 
         assert.equal(env.fetchCalls.length, 1);
-        assert.equal(env.dispatchedEvents.at(-1).type, 'clearSearchResults');
+        assert.equal(env.dispatchedEvents.at(-1).type, 'searchError');
         assert.ok(!env.dispatchedEvents.some((e) => e.type === 'searchResults'));
     });
 

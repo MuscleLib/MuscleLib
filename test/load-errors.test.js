@@ -106,3 +106,17 @@ test('search errors render in the catalogue without removing existing results', 
     retry(env);
     assert.equal(retried, true);
 });
+
+test('an aborted search cannot report a stale error after the query is cleared', async () => {
+    const env = createSearchEnvironment();
+    let reject;
+    env.context.fetch = () => new Promise((resolve, rejectFetch) => { reject = rejectFetch; });
+    loadScript('public/js/components/search.js', env.context);
+    const input = env.placeholder.children[0].children[0];
+    input.dispatchEvent({ type: 'input', target: { value: 'squat' } });
+    env.timerController.runAll();
+    input.dispatchEvent({ type: 'input', target: { value: '' } });
+    reject(new TypeError('Failed to fetch'));
+    await flushPromises();
+    assert.equal(env.dispatchedEvents.at(-1).type, 'clearSearchResults');
+});
