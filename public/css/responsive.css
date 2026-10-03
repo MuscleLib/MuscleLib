@@ -41,7 +41,7 @@
 
     .logo-img {
         height: 56px;
-        width: 50vh;
+        width: clamp(90px, 28vw, 164px);
     }
 
     .nav-actions {
@@ -278,7 +278,7 @@
 
     .logo-img {
         height: 52px;
-        width: 15vh;
+        width: clamp(90px, 28vw, 120px);
     }
 
     .nav-actions {
