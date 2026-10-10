@@ -79,6 +79,51 @@ test('a new filter request supersedes a pending request', async () => {
     assert.equal(env.exercisesContainer.children[0].children[0].textContent, 'Expert squat');
 });
 
+for (const change of ['filter', 'language']) {
+    test(`scroll recovery after a failed ${change} reload replaces the previous catalogue`, async () => {
+        const env = environment();
+        const calls = [];
+        let fail = false;
+        env.context.fetch = async url => {
+            if (url.includes('/filters')) return response({ level: ['beginner'] });
+            calls.push(url);
+            if (fail) return response({}, 500);
+            const params = new URL(url).searchParams;
+            if (params.get('page') === '1') return response([exercise('Next page')]);
+            const changed = params.get('level') === 'beginner' || params.get('lang') === 'es';
+            return response(Array.from({ length: 50 }, (_, i) => exercise(`${changed ? 'New' : 'Old'} ${i}`)));
+        };
+        loadScript('public/js/script.js', env.context);
+        await flushPromises();
+
+        fail = true;
+        if (change === 'filter') {
+            env.filterSelects.level.value = 'beginner';
+            env.filterSelects.level.dispatchEvent({ type: 'change' });
+        } else {
+            env.languageSelect.value = 'es';
+            env.languageSelect.dispatchEvent({ type: 'change' });
+        }
+        await flushPromises();
+        assert.equal(env.exercisesContainer.children.length, 50, 'keep the previous cards while offline');
+        assert.equal(env.errors.children.length, 1);
+
+        fail = false;
+        env.windowListeners.scroll[0]();
+        await flushPromises();
+        const names = () => env.exercisesContainer.children.map(card => card.children.find(child => child.tagName === 'h3').textContent);
+        assert.equal(names().length, 50, 'the recovered first page must replace the old cards');
+        assert.ok(names().every(name => name.startsWith('New ')));
+        assert.equal(env.errors.children.length, 0);
+
+        env.windowListeners.scroll[0]();
+        await flushPromises();
+        assert.equal(names().length, 51, 'subsequent pages must still append');
+        assert.equal(names().at(-1), 'Next page');
+        assert.equal(new URL(calls.at(-1)).searchParams.get('page'), '1');
+    });
+}
+
 test('failed searches expose a retry for the same query instead of clearing results', async () => {
     const env = createSearchEnvironment({ errorResponse: true });
     loadScript('public/js/components/search.js', env.context);
