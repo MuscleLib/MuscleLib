@@ -445,7 +445,8 @@ async function fetchExercises(page = 0, limit = exercisesPerPage, replace = fals
 
         const exercises = await response.json();
         if (requestId !== exerciseRequestId) return;
-        if (replace) resetExercisesContainer();
+        // Page zero can also be retried by scrolling after a failed reload.
+        if (replace || page === 0) resetExercisesContainer();
         clearRequestError("exercises");
 
         if (exercises.length > 0) {
